@@ -5,8 +5,10 @@ __author__ = '@damianmooney'
  should also play nice with minecraft-pi edition
 """
 
+import platform
 import string
-from mc import *
+from mcpi import minecraft as minecraft
+from mcpi import block as block
 import time
 
 def do_a():
@@ -307,12 +309,21 @@ def do_quote():
     return let
 
 
-mc = Minecraft()
-
+mc = minecraft.Minecraft.create()
 playerPos = mc.player.getPos()
-myx = int(playerPos.x) - 48
-myy = int(playerPos.y) + 8
-myz = int(playerPos.z) - 48
+
+which_sys = platform.uname()
+mc.postToChat(which_sys)
+if 'raspberrypi' in which_sys:
+    qfile = 'quotespi.txt'
+    myx = int(playerPos.x) - 24
+    myy = int(playerPos.y) + 8
+    myz = int(playerPos.z) - 24
+else:
+    qfile = 'quotes.txt'
+    myx = int(playerPos.x) - 48
+    myy = int(playerPos.y) + 8
+    myz = int(playerPos.z) - 48
 
 xoffset = 0
 block_offset = 0
@@ -322,7 +333,7 @@ mc.postToChat(initpos)
 quotes = []
 
 # read the txt file into a list
-f = open('quotes.txt', 'r')
+f = open(qfile, 'r')
 while True:
     buff = f.readline()
     if buff == '':
@@ -359,11 +370,11 @@ for message in quotes:
 
                 if j == 'x':
                     # place a block
-                    mc.setBlock(myx + xoffset + block_offset, myy + yoffset, myz, GOLD_BLOCK)
+                    mc.setBlock(myx + xoffset + block_offset, myy + yoffset, myz, block.GOLD_BLOCK)
                     # debug.write('%d - %d - %d gold | ' % (myx + xoffset + block_offset, myy + yoffset, myz))
                 else:
                     # place air gaps
-                    mc.setBlock(myx + xoffset + block_offset, myy + yoffset, myz, AIR)
+                    mc.setBlock(myx + xoffset + block_offset, myy + yoffset, myz, block.AIR)
                     # debug.write('%d - %d - %d air | ' % (myx + xoffset + block_offset, myy + yoffset, myz))
 
                 xoffset += 1
@@ -372,7 +383,7 @@ for message in quotes:
         block_offset += letterw + 1
     time.sleep(5.0)
     # blank out whole line
-    mc.setBlocks(myx, myy - 6, myz, myx + xoffset + block_offset, myy, myz, AIR)
+    mc.setBlocks(myx, myy - 6, myz, myx + xoffset + block_offset, myy, myz, block.AIR)
     time.sleep(1.0)
     block_offset = 0
     xoffset = 0
