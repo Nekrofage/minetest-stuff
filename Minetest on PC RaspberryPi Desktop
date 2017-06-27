@@ -1,0 +1,80 @@
+Just how I Installed Minetest, raspberryjammod and then edublocks on the PixelOS RaspberryPI desktop for PC
+
+There was a far bit of trial and error so some of these steps can no doubt be improved, anyway here goes.
+
+Download OS iso and write to usb stick.
+Boot old laptop and select boot from usb.
+Run with persistence.
+Once the desktop boots ->add new software
+  search for Minetest and select all of the items
+  then add the socket library for lua
+  add new software
+  search for lua-sock and then select lua-socket-3.0~........
+
+Next we need the raspberryjammod by arpruss for minetest
+You can get here https://github.com/arpruss/raspberryjammod-minetest
+
+make a folder for minetest in your home ie
+/home/pi/.minetest/mods
+Download the zip and extract so that you end up with
+/home/pi/.minetest/mods/raspberryjammod
+
+Start Minetest and create a new world
+Give it a name, mapgen v6 and select minetest rather than Minimal test
+In the single player tab select your world and then configure
+Make sure you enable raspberryjammod
+
+Start the game
+if you want to write some python or run a preexisting script open a terminal and go to
+/home/pi/.minetest/mods/raspberryjammod/mcpipy
+then from the command line
+python yourscript.py
+if all went well you should see some blocks being placed in minetest
+
+So this should now run the same scripts that you could run on Minecraft-pi
+
+Next I tried to get @edu_blocks working, this was a little bit tricky but I guess it was because I had no real 
+clue what was going on ;)
+
+I went to https://github.com/allaboutcode/edublocks
+and ran the curl command which seemed to do a fair bit but I noticed that arm processor was referenced. It was no surprise
+that I got an error when I tried to run edu_blocks
+I went to /opt/edublocks/server in the terminal and ran ./start.sh so I could see what the issue was
+The error told me that I could not execute the binary file format for the node program. I guessed that this was because I was 
+on x86 rather than the arm processor in the pi.
+
+So I tried
+sudo apt-get install nodejs
+I removed the node program at /opt/edublocks/bin/node
+set up a symlink
+ln -d /usr/bin/nodejs /opt/edublocks/bin/node
+I got a different error which was because the system version of node was too old so I followed the instructions here
+running all the instructions as sudo
+https://gist.github.com/opi/1dce5be10717183ccc03
+after that running 
+node -v
+indicated that the version was ok
+I ran edublocks from the desktop and while it appeared to launch the server on port 8081 the program closed after a few minutes.
+I went to /opt/edublocks/server in the terminal and ran ./start.sh again and the server worked.
+Next open a browser and go to 127.0.0.1:8081
+Success!
+Edublocks loaded
+so I put together a small minecraft script and got a cant find mcpi error
+edublocks puts its python program in /home/pi/.edublocks so as a quick work around I copied the mcpi folder from 
+/home/pi/.minetest/mods/raspberryjammod/mcpipy/mcpi and dumped the contents into ~/.edublocks
+
+When I selected run I got a different error but when I looked at the code it seemed fine. I exported the code to ~./edublocks
+and ran from the terminal.
+The code ran and the blocks were placed in minetest.
+After some digging it appeared to be a conflict in python versions. System python is 2.7 but edublocks was running python3.
+In the terminal I changed to ~/.edublocks and ran the following
+2to3 -w .
+this made some changes to the code to make it python3 compatible
+Back to edublocks ->Run ->Blocks placed in Minetest. Yay!
+
+So a botched together solution of guesses and hacks but thats part of the fun :)
+
+I am sure that people who know about these things can vastly improve on the above.
+
+Best of Luck
+@damianmooney
